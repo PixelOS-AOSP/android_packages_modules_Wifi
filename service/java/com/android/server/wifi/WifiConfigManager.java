@@ -713,6 +713,32 @@ public class WifiConfigManager {
         return internalConfig.getRandomizedMacAddress();
     }
 
+    private @Nullable MacAddress getCustomRandomizedMacAddress(WifiConfiguration config) {
+        if (config.macRandomizationSetting == WifiConfiguration.RANDOMIZATION_NONE
+                || TextUtils.isEmpty(config.customMacAddressForRandomization)) {
+            return null;
+        }
+        try {
+            final MacAddress customMac =
+                    MacAddress.fromString(config.customMacAddressForRandomization);
+            if (!WifiConfiguration.isValidMacAddressForRandomization(customMac)) {
+                Log.e(TAG, "Ignoring invalid custom randomized MAC: "
+                        + config.customMacAddressForRandomization);
+                return null;
+            }
+            final WifiConfiguration internalConfig = getInternalConfiguredNetwork(config.networkId);
+            if (internalConfig != null
+                    && !customMac.equals(internalConfig.getRandomizedMacAddress())) {
+                setRandomizedMacAddress(internalConfig, customMac);
+            }
+            return customMac;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ignoring malformed custom randomized MAC: "
+                    + config.customMacAddressForRandomization, e);
+            return null;
+        }
+    }
+
     /**
      * Returns the randomized MAC address that should be used for this WifiConfiguration.
      * This API may return a randomized MAC different from the persistent randomized MAC if
@@ -722,6 +748,10 @@ public class WifiConfigManager {
      */
     public MacAddress getRandomizedMacAndUpdateIfNeeded(WifiConfiguration config,
             boolean isForSecondaryDbs) {
+        final MacAddress customMac = getCustomRandomizedMacAddress(config);
+        if (customMac != null) {
+            return customMac;
+        }
         MacAddress mac = shouldUseNonPersistentRandomization(config)
                 ? updateRandomizedMacIfNeeded(config)
                 : setRandomizedMacToPersistentMac(config);
@@ -1384,6 +1414,8 @@ public class WifiConfigManager {
 
         // Copy over macRandomizationSetting
         internalConfig.macRandomizationSetting = externalConfig.macRandomizationSetting;
+        internalConfig.customMacAddressForRandomization =
+                externalConfig.customMacAddressForRandomization;
         internalConfig.carrierId = externalConfig.carrierId;
         internalConfig.isHomeProviderNetwork = externalConfig.isHomeProviderNetwork;
         internalConfig.subscriptionId = externalConfig.subscriptionId;

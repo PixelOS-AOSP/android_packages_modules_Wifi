@@ -281,9 +281,12 @@ public class WifiConfigurationUtil {
     public static boolean hasMacRandomizationSettingsChanged(WifiConfiguration existingConfig,
             WifiConfiguration newConfig) {
         if (existingConfig == null) {
-            return newConfig.macRandomizationSetting != WifiConfiguration.RANDOMIZATION_AUTO;
+            return newConfig.macRandomizationSetting != WifiConfiguration.RANDOMIZATION_AUTO
+                    || !TextUtils.isEmpty(newConfig.customMacAddressForRandomization);
         }
-        return newConfig.macRandomizationSetting != existingConfig.macRandomizationSetting;
+        return newConfig.macRandomizationSetting != existingConfig.macRandomizationSetting
+                || !Objects.equals(newConfig.customMacAddressForRandomization,
+                existingConfig.customMacAddressForRandomization);
     }
 
     /**
@@ -1105,6 +1108,18 @@ public class WifiConfigurationUtil {
         if (config.isSecurityType(WifiConfiguration.SECURITY_TYPE_SAE)
                 && !validatePassword(config.preSharedKey, true, true, false)) {
             return false;
+        }
+        if (!TextUtils.isEmpty(config.customMacAddressForRandomization)) {
+            try {
+                if (!WifiConfiguration.isValidMacAddressForRandomization(
+                        MacAddress.fromString(config.customMacAddressForRandomization))) {
+                    Log.e(TAG, "validate failed: invalid custom randomized MAC address");
+                    return false;
+                }
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "validate failed: malformed custom randomized MAC address", e);
+                return false;
+            }
         }
         // TBD: Validate some enterprise params as well in the future here.
         return true;
