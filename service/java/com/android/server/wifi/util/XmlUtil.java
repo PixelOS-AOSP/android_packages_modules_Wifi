@@ -381,6 +381,8 @@ public class XmlUtil {
         public static final String XML_TAG_MAC_RANDOMIZATION_SETTING = "MacRandomizationSetting";
         public static final String XML_TAG_PERSISTENT_MAC_RANDOMIZATION_SEED =
                 "PersistentMacRandomizationSeed";
+        public static final String XML_TAG_CUSTOM_MAC_ADDRESS_FOR_RANDOMIZATION =
+                "CustomMacAddressForRandomization";
         public static final String XML_TAG_SEND_DHCP_HOSTNAME = "SendDhcpHostname";
         public static final String XML_TAG_CARRIER_ID = "CarrierId";
         public static final String XML_TAG_SUBSCRIPTION_ID = "SubscriptionId";
@@ -720,6 +722,8 @@ public class XmlUtil {
             }
             XmlUtil.writeNextValue(out, XML_TAG_PERSISTENT_MAC_RANDOMIZATION_SEED,
                     configuration.persistentMacRandomizationSeed);
+            XmlUtil.writeNextValue(out, XML_TAG_CUSTOM_MAC_ADDRESS_FOR_RANDOMIZATION,
+                    configuration.customMacAddressForRandomization);
 
             if (Flags.multiUserWifiEnhancement() && Environment.isSdkNewerThanB()) {
                 XmlUtil.writeNextValue(out, XML_TAG_CREATOR_USER_ID,
@@ -1041,6 +1045,9 @@ public class XmlUtil {
                             break;
                         case XML_TAG_PERSISTENT_MAC_RANDOMIZATION_SEED:
                             configuration.persistentMacRandomizationSeed = (int) value;
+                            break;
+                        case XML_TAG_CUSTOM_MAC_ADDRESS_FOR_RANDOMIZATION:
+                            configuration.customMacAddressForRandomization = (String) value;
                             break;
                         case XML_TAG_SEND_DHCP_HOSTNAME:
                             configuration.setSendDhcpHostnameEnabled((boolean) value);
