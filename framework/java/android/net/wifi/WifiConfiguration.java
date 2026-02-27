@@ -1971,13 +1971,13 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * Checks if the given MAC address can be used for Connected Mac Randomization
-     * by verifying that it is non-null, unicast, locally assigned, and not default mac.
+     * by verifying that it is non-null, unicast, and not default mac.
      * @param mac MacAddress to check
      * @return true if mac is good to use
      * @hide
      */
     public static boolean isValidMacAddressForRandomization(MacAddress mac) {
-        return mac != null && !MacAddressUtils.isMulticastAddress(mac) && mac.isLocallyAssigned()
+        return mac != null && !MacAddressUtils.isMulticastAddress(mac)
                 && !MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS).equals(mac);
     }
 
