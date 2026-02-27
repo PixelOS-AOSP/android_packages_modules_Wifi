@@ -1970,14 +1970,22 @@ public class WifiConfiguration implements Parcelable {
     public int persistentMacRandomizationSeed = 0;
 
     /**
+     * Optional custom MAC address to use when connected MAC randomization is enabled.
+     * Empty means framework-generated randomized MAC should be used.
+     * @hide
+     */
+    @Nullable
+    public String customMacAddressForRandomization;
+
+    /**
      * Checks if the given MAC address can be used for Connected Mac Randomization
-     * by verifying that it is non-null, unicast, locally assigned, and not default mac.
+     * by verifying that it is non-null, unicast, and not default mac.
      * @param mac MacAddress to check
      * @return true if mac is good to use
      * @hide
      */
     public static boolean isValidMacAddressForRandomization(MacAddress mac) {
-        return mac != null && !MacAddressUtils.isMulticastAddress(mac) && mac.isLocallyAssigned()
+        return mac != null && !MacAddressUtils.isMulticastAddress(mac)
                 && !MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS).equals(mac);
     }
 
@@ -3571,6 +3579,8 @@ public class WifiConfiguration implements Parcelable {
                         : logTimeOfDay(randomizedMacLastModifiedTimeMs)).append("\n");
         sbuf.append(" persistentMacRandomizationSeed: ").append(persistentMacRandomizationSeed)
                 .append("\n");
+        sbuf.append(" customMacAddressForRandomization: ")
+                .append(customMacAddressForRandomization).append("\n");
         sbuf.append(" mIsSendDhcpHostnameEnabled: ").append(mIsSendDhcpHostnameEnabled)
                 .append("\n");
         sbuf.append(" deletionPriority: ").append(mDeletionPriority).append("\n");
@@ -4182,6 +4192,7 @@ public class WifiConfiguration implements Parcelable {
             randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
             randomizedMacLastModifiedTimeMs = source.randomizedMacLastModifiedTimeMs;
             persistentMacRandomizationSeed = source.persistentMacRandomizationSeed;
+            customMacAddressForRandomization = source.customMacAddressForRandomization;
             mIsSendDhcpHostnameEnabled = source.mIsSendDhcpHostnameEnabled;
             requirePmf = source.requirePmf;
             updateIdentifier = source.updateIdentifier;
@@ -4316,6 +4327,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeBoolean(mWifi7Enabled);
         dest.writeBoolean(mIsAllowedToUpdateByOtherUsers);
         dest.writeInt(persistentMacRandomizationSeed);
+        dest.writeString(customMacAddressForRandomization);
         dest.writeInt(mCreatorUserId);
     }
 
@@ -4448,6 +4460,7 @@ public class WifiConfiguration implements Parcelable {
                     config.mWifi7Enabled = in.readBoolean();
                     config.mIsAllowedToUpdateByOtherUsers = in.readBoolean();
                     config.persistentMacRandomizationSeed = in.readInt();
+                    config.customMacAddressForRandomization = in.readString();
                     config.mCreatorUserId = in.readInt();
                     return config;
                 }
